@@ -33,26 +33,30 @@
 ## 二、核心功能开发计划
 
 ### 2.1 注解模块 📝
-- [ ] @Controller
+- [x] @Controller
   - 功能：标记控制器类
-  - 状态：待实现
+  - 状态：已实现
   
-- [ ] @Service
+- [x] @Service
   - 功能：标记服务类
-  - 状态：待实现
+  - 状态：已实现
   
-- [ ] @Autowired
+- [x] @Autowired
   - 功能：依赖注入
-  - 状态：待实现
+  - 状态：已实现
   
-- [ ] @RequestMapping
+- [x] @RequestMapping
   - 功能：URL映射
-  - 状态：待实现
+  - 状态：已实现
+
+- [x] @Component
+  - 功能：基础组件注解
+  - 状态：已实现
 
 ### 2.2 IoC容器 📝
 - [ ] BeanFactory
   - 功能：Bean工厂接口
-  - 状态：待实现
+  - 状态：开发中
   
 - [ ] ApplicationContext
   - 功能：应用上下文
