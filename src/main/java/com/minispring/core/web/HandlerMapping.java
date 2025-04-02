@@ -1,6 +1,6 @@
 package com.minispring.core.web;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 处理器映射接口

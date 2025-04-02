@@ -1,13 +1,13 @@
 package com.minispring.core.web;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * 处理器方法参数解析器接口
+ * 方法参数解析器接口
  */
 public interface HandlerMethodArgumentResolver {
     /**
-     * 判断是否支持参数解析
+     * 判断是否支持参数类型
      * @param parameter 方法参数
      * @return 是否支持
      */

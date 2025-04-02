@@ -3,11 +3,11 @@ package com.minispring.core.web;
 import com.minispring.core.context.AnnotationConfigApplicationContext;
 import com.minispring.core.context.ApplicationContext;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -73,6 +73,9 @@ public class DispatcherServlet extends HttpServlet {
             throws ServletException, IOException {
         try {
             logger.info("Processing request: " + req.getRequestURI());
+            logger.info("Context Path: " + req.getContextPath());
+            logger.info("Servlet Path: " + req.getServletPath());
+            logger.info("Path Info: " + req.getPathInfo());
             
             // 1. 查找处理器
             HandlerExecutionChain handler = handlerMapping.getHandler(req);

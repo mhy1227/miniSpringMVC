@@ -3,17 +3,20 @@ package com.minispring.core.web;
 import com.minispring.core.annotation.Controller;
 import com.minispring.core.annotation.RequestMapping;
 import com.minispring.core.context.ApplicationContext;
+import jakarta.servlet.http.HttpServletRequest;
 
-import javax.servlet.http.HttpServletRequest;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 /**
  * 基于@RequestMapping注解的处理器映射实现
  */
 public class RequestMappingHandlerMapping implements HandlerMapping {
+    private static final Logger logger = Logger.getLogger(RequestMappingHandlerMapping.class.getName());
     private final Map<String, HandlerExecutionChain> urlHandlers = new HashMap<>();
     private final ApplicationContext applicationContext;
     private boolean initialized = false;
@@ -32,11 +35,13 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
 
         // 获取所有bean的名称
         String[] beanNames = applicationContext.getBeanDefinitionNames();
+        logger.info("Found " + beanNames.length + " beans");
         
         try {
             for (String beanName : beanNames) {
                 Object bean = applicationContext.getBean(beanName);
                 Class<?> beanClass = bean.getClass();
+                logger.info("Processing bean: " + beanClass.getName());
                 
                 // 只处理带有@Controller注解的类
                 if (beanClass.isAnnotationPresent(Controller.class)) {
@@ -55,6 +60,8 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
                             String methodPath = normalizePath(requestMapping.value());
                             String url = baseUrl + methodPath;
                             
+                            logger.info("Mapping URL: " + url + " to method: " + method);
+                            
                             // 检查URL是否已存在
                             if (urlHandlers.containsKey(url)) {
                                 throw new IllegalStateException(
@@ -71,7 +78,9 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
                 }
             }
             initialized = true;
+            logger.info("URL mappings initialized: " + urlHandlers.keySet());
         } catch (Exception e) {
+            logger.severe("Failed to initialize handler mappings: " + e.getMessage());
             throw new IllegalStateException("Failed to initialize handler mappings", e);
         }
     }
@@ -87,8 +96,17 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
         String contextPath = request.getContextPath();
         String url = normalizePath(requestURI.substring(contextPath.length()));
         
+        logger.info("Looking for handler for URL: " + url);
+        logger.info("Available mappings: " + urlHandlers.keySet());
+        
         // 查找对应的处理器
-        return urlHandlers.get(url);
+        HandlerExecutionChain handler = urlHandlers.get(url);
+        if (handler == null) {
+            logger.warning("No handler found for URL: " + url);
+        } else {
+            logger.info("Found handler: " + handler);
+        }
+        return handler;
     }
 
     /**
