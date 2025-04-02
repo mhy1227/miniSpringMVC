@@ -20,7 +20,7 @@ mvc.view.suffix=.jsp
          version="3.1">
 
     <servlet>
-        <servlet-name>miniSpring</servlet-name>
+        <servlet-name>miniSpringMVC</servlet-name>
         <servlet-class>com.minispring.core.web.DispatcherServlet</servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>

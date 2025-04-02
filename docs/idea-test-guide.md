@@ -71,7 +71,7 @@ src/test/java/com/minispring/test/mvc/    # 测试控制器目录
 1. 基本参数测试
    - 启动项目（点击IDEA顶部的绿色运行按钮）
    - 等待Tomcat启动完成
-   - 在浏览器访问：`http://localhost:8080/hello`
+   - 在浏览器访问：`http://localhost:8080/hello.do`
    - 预期看到：`Hello, World!`
 
 2. 调试技巧
@@ -104,15 +104,15 @@ src/test/java/com/minispring/test/mvc/    # 测试控制器目录
 
 1. 参数绑定测试
 ```http
-GET http://localhost:8080/hello
-GET http://localhost:8080/hello?name=张三
-GET http://localhost:8080/user?id=123
+GET http://localhost:8080/hello.do
+GET http://localhost:8080/hello.do?name=张三
+GET http://localhost:8080/user.do?id=123
 ```
 
 2. 视图测试
 ```http
-GET http://localhost:8080/view/test
-GET http://localhost:8080/view/test?message=测试消息
+GET http://localhost:8080/view/test.do
+GET http://localhost:8080/view/test.do?message=测试消息
 ```
 
 ## 六、IDEA 调试技巧
