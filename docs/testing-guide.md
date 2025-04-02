@@ -5,7 +5,7 @@
 1. 确保已配置 Tomcat
 2. 创建测试配置文件 `src/main/resources/application.properties`：
 ```properties
-scan.package=com.minispring.test
+scan.package=com.minispring.test.mvc
 mvc.view.prefix=/WEB-INF/views/
 mvc.view.suffix=.jsp
 ```
@@ -30,8 +30,8 @@ mvc.view.suffix=.jsp
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>miniSpring</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <servlet-name>miniSpringMVC</servlet-name>
+        <url-pattern>*.do</url-pattern>
     </servlet-mapping>
 </web-app>
 ```
@@ -56,19 +56,19 @@ public class UserController {
 ```
 
 测试场景：
-1. 访问 `http://localhost:8080/hello`
-   - 预期结果：`Hello, World!`
-   - 测试点：默认值处理
-
-2. 访问 `http://localhost:8080/hello?name=张三`
+1. 访问 `http://localhost:8080/mvc/hello.do?name=张三`
    - 预期结果：`Hello, 张三!`
    - 测试点：参数正确传递
 
-3. 访问 `http://localhost:8080/user?id=123`
+2. 访问 `http://localhost:8080/mvc/hello.do`
+   - 预期结果：`Hello, World!`
+   - 测试点：默认值处理
+
+3. 访问 `http://localhost:8080/mvc/user.do?id=123`
    - 预期结果：`user-123`
    - 测试点：数字类型转换
 
-4. 访问 `http://localhost:8080/user`
+4. 访问 `http://localhost:8080/mvc/user.do`
    - 预期结果：错误提示（参数缺失）
    - 测试点：必需参数验证
 
@@ -80,7 +80,8 @@ public class UserController {
 public class ViewController {
     @RequestMapping("/view/test")
     public String testView(
-            @RequestParam(value = "message", defaultValue = "Hello JSP") String message) {
+            @RequestParam(value = "message", defaultValue = "Hello JSP") String message,
+            HttpServletRequest request) {
         request.setAttribute("message", message);
         return "test";  // 将解析为 /WEB-INF/views/test.jsp
     }
@@ -101,11 +102,11 @@ public class ViewController {
 ```
 
 测试场景：
-1. 访问 `http://localhost:8080/view/test`
+1. 访问 `http://localhost:8080/mvc/view/test.do`
    - 预期结果：显示包含 "Hello JSP" 的页面
    - 测试点：基本视图解析
 
-2. 访问 `http://localhost:8080/view/test?message=自定义消息`
+2. 访问 `http://localhost:8080/mvc/view/test.do?message=自定义消息`
    - 预期结果：显示包含 "自定义消息" 的页面
    - 测试点：参数传递到视图
 
@@ -140,4 +141,5 @@ public class ViewController {
 1. 确保编译时添加了 JSP 支持
 2. 中文参数需要注意编码问题
 3. 留意控制台的异常信息
-4. 测试前确保配置文件正确加载 
+4. 测试前确保配置文件正确加载
+5. 所有请求URL都需要添加.do后缀 
