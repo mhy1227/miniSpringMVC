@@ -16,12 +16,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * MVC核心分发器
  * 负责请求的分发和处理
  */
 public class DispatcherServlet extends HttpServlet {
+    private static final Logger logger = Logger.getLogger(DispatcherServlet.class.getName());
+    
     private ApplicationContext applicationContext;
     private HandlerMapping handlerMapping;
     private ViewResolver viewResolver;
@@ -33,6 +36,8 @@ public class DispatcherServlet extends HttpServlet {
         super.init(config);
         
         try {
+            logger.info("Initializing DispatcherServlet...");
+            
             // 1. 加载配置文件
             String contextConfigLocation = config.getInitParameter("contextConfigLocation");
             loadConfig(contextConfigLocation);
@@ -40,6 +45,7 @@ public class DispatcherServlet extends HttpServlet {
             // 2. 初始化ApplicationContext
             String basePackage = properties.getProperty("scan.package");
             applicationContext = new AnnotationConfigApplicationContext(basePackage);
+            applicationContext.refresh(); // 刷新上下文
             
             // 3. 初始化HandlerMapping
             handlerMapping = new RequestMappingHandlerMapping(applicationContext);
@@ -50,7 +56,9 @@ public class DispatcherServlet extends HttpServlet {
             // 5. 初始化参数解析器
             initArgumentResolvers();
             
+            logger.info("DispatcherServlet initialization completed");
         } catch (Exception e) {
+            logger.severe("Failed to initialize DispatcherServlet: " + e.getMessage());
             throw new ServletException("Failed to initialize DispatcherServlet", e);
         }
     }
@@ -64,9 +72,12 @@ public class DispatcherServlet extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse resp) 
             throws ServletException, IOException {
         try {
+            logger.info("Processing request: " + req.getRequestURI());
+            
             // 1. 查找处理器
             HandlerExecutionChain handler = handlerMapping.getHandler(req);
             if (handler == null) {
+                logger.warning("No handler found for request: " + req.getRequestURI());
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
@@ -83,6 +94,7 @@ public class DispatcherServlet extends HttpServlet {
             handleResponse(req, resp, result);
             
         } catch (Exception e) {
+            logger.severe("Failed to handle request: " + e.getMessage());
             throw new ServletException("Failed to handle request", e);
         }
     }

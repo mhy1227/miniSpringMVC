@@ -6,6 +6,7 @@ import com.minispring.core.bean.DefaultBeanDefinition;
 import com.minispring.core.bean.DefaultBeanFactory;
 import com.minispring.core.util.ClassScanner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,21 +15,25 @@ import java.util.List;
  */
 public class AnnotationConfigApplicationContext implements ApplicationContext {
     private final DefaultBeanFactory beanFactory;
-    private final String basePackage;
+    private final String[] basePackages;
     private boolean active = false;
 
     public AnnotationConfigApplicationContext(String basePackage) {
-        this.basePackage = basePackage;
+        this.basePackages = basePackage.split(",");
         this.beanFactory = new DefaultBeanFactory();
     }
 
     @Override
     public void refresh() throws Exception {
-        // 1. 扫描包下带有@Component注解的类
-        List<Class<?>> classes = ClassScanner.scanWithAnnotation(basePackage, Component.class);
+        // 1. 扫描所有包下带有@Component注解的类
+        List<Class<?>> allClasses = new ArrayList<>();
+        for (String basePackage : basePackages) {
+            List<Class<?>> classes = ClassScanner.scanWithAnnotation(basePackage.trim(), Component.class);
+            allClasses.addAll(classes);
+        }
         
         // 2. 注册Bean定义
-        for (Class<?> clazz : classes) {
+        for (Class<?> clazz : allClasses) {
             DefaultBeanDefinition beanDefinition = new DefaultBeanDefinition();
             beanDefinition.setBeanClassName(clazz.getName());
             
@@ -77,7 +82,7 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     @Override
     public String getConfigLocation() {
-        return this.basePackage;
+        return String.join(",", basePackages);
     }
 
     @Override
