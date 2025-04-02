@@ -114,11 +114,21 @@
   - 功能：反射工具类
   - 状态：已实现
 
-### 2.5 下一步计划
-- [ ] MVC功能增强
-  - 实现请求参数绑定
-  - 实现JSON响应处理
-  - 完善异常处理机制
+### 2.5 MVC功能增强
+- [ ] 请求参数绑定
+  - 功能：将HTTP请求参数绑定到控制器方法参数
+  - 状态：基础设施已完成
+    - ✅ @RequestParam 注解定义
+    - ✅ MethodParameter 参数封装类
+    - ✅ HandlerMethodArgumentResolver 接口
+    - ⚠️ RequestParamArgumentResolver 实现中
+    - ⚠️ 参数解析器集成到 DispatcherServlet
+- [ ] JSON响应处理
+  - 功能：支持JSON格式的响应数据
+  - 状态：待实现
+- [ ] 异常处理机制
+  - 功能：统一的异常处理
+  - 状态：待实现
 
 ## 三、测试计划
 

@@ -10,7 +10,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -22,6 +25,7 @@ public class DispatcherServlet extends HttpServlet {
     private ApplicationContext applicationContext;
     private HandlerMapping handlerMapping;
     private ViewResolver viewResolver;
+    private List<HandlerMethodArgumentResolver> argumentResolvers;
     private Properties properties;
 
     @Override
@@ -43,19 +47,17 @@ public class DispatcherServlet extends HttpServlet {
             // 4. 初始化ViewResolver
             initViewResolver();
             
+            // 5. 初始化参数解析器
+            initArgumentResolvers();
+            
         } catch (Exception e) {
             throw new ServletException("Failed to initialize DispatcherServlet", e);
         }
     }
 
-    /**
-     * 初始化视图解析器
-     */
-    private void initViewResolver() {
-        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix(properties.getProperty("mvc.view.prefix", "/WEB-INF/views/"));
-        resolver.setSuffix(properties.getProperty("mvc.view.suffix", ".jsp"));
-        this.viewResolver = resolver;
+    private void initArgumentResolvers() {
+        argumentResolvers = new ArrayList<>();
+        argumentResolvers.add(new RequestParamArgumentResolver());
     }
 
     @Override
@@ -69,12 +71,13 @@ public class DispatcherServlet extends HttpServlet {
                 return;
             }
 
-            // 2. 调用处理器方法
+            // 2. 准备方法参数
             Object controller = handler.getHandler();
             Method method = handler.getHandlerMethod();
+            Object[] args = resolveHandlerArguments(method, req);
             
-            // 3. 执行方法
-            Object result = method.invoke(controller);
+            // 3. 调用处理器方法
+            Object result = method.invoke(controller, args);
             
             // 4. 处理响应
             handleResponse(req, resp, result);
@@ -82,6 +85,28 @@ public class DispatcherServlet extends HttpServlet {
         } catch (Exception e) {
             throw new ServletException("Failed to handle request", e);
         }
+    }
+
+    private Object[] resolveHandlerArguments(Method method, HttpServletRequest request) throws Exception {
+        Parameter[] parameters = method.getParameters();
+        Object[] args = new Object[parameters.length];
+        
+        for (int i = 0; i < parameters.length; i++) {
+            MethodParameter methodParameter = new MethodParameter(method, i);
+            args[i] = resolveArgument(methodParameter, request);
+        }
+        
+        return args;
+    }
+
+    private Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+        for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
+            if (resolver.supportsParameter(parameter)) {
+                return resolver.resolveArgument(parameter, request);
+            }
+        }
+        throw new IllegalArgumentException(
+            "Unsupported parameter type: " + parameter.getParameterType().getName());
     }
 
     /**
@@ -105,6 +130,16 @@ public class DispatcherServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("text/plain;charset=UTF-8");
         response.getWriter().write(String.valueOf(result));
+    }
+
+    /**
+     * 初始化视图解析器
+     */
+    private void initViewResolver() {
+        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+        resolver.setPrefix(properties.getProperty("mvc.view.prefix", "/WEB-INF/views/"));
+        resolver.setSuffix(properties.getProperty("mvc.view.suffix", ".jsp"));
+        this.viewResolver = resolver;
     }
 
     /**
