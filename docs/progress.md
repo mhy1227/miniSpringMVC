@@ -61,35 +61,59 @@
     - 实现依赖注入（字段注入）
     - 支持单例和原型作用域
   
-- [ ] ApplicationContext
+- [x] ApplicationContext
   - 功能：应用上下文
-  - 状态：待实现
+  - 状态：已实现
+    - 完成Bean的扫描和注册
+    - 实现Bean的生命周期管理
+    - 支持Bean的初始化和销毁
+    - 提供应用上下文状态管理
   
 - [x] BeanDefinition
   - 功能：Bean定义
   - 状态：已实现
 
 ### 2.3 MVC核心 📝
-- [ ] DispatcherServlet
+- [x] DispatcherServlet
   - 功能：核心分发器
-  - 状态：待实现
+  - 状态：基础功能已实现
+    - 支持配置文件加载
+    - 集成ApplicationContext
+    - 集成HandlerMapping
+    - 基本的请求分发
+    - 简单的响应处理
+    - 生命周期管理
   
-- [ ] HandlerMapping
+- [x] HandlerMapping
   - 功能：处理器映射
-  - 状态：待实现
+  - 状态：已实现
+    - 支持类级别和方法级别的@RequestMapping
+    - 支持URL到处理方法的映射
+    - 提供处理器执行链
+    - URL路径标准化处理
+    - 重复URL检测
+    - 线程安全的延迟初始化
   
 - [ ] ViewResolver
   - 功能：视图解析器
   - 状态：待实现
 
 ### 2.4 工具类 📝
-- [ ] ClassScanner
+- [x] ClassScanner
   - 功能：类扫描器
-  - 状态：待实现
+  - 状态：基础功能已实现
+    - 支持扫描指定包下的所有类
+    - 支持按注解过滤类
   
-- [ ] ReflectionUtil
+- [x] ReflectionUtil
   - 功能：反射工具类
-  - 状态：待实现
+  - 状态：已实现
+
+### 2.5 下一步计划
+- [ ] MVC功能增强
+  - 实现请求参数绑定
+  - 实现JSON响应处理
+  - 完善异常处理机制
 
 ## 三、测试计划
 
