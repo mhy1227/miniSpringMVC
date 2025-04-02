@@ -23,7 +23,7 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/yourusername/mini-spring-mvc.git
+git clone https://github.com/mhy1227/mini-spring-mvc.git
 ```
 
 2. 编译打包
