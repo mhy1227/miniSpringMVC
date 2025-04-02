@@ -24,17 +24,56 @@ public class DefaultBeanFactory implements BeanFactory {
         beanDefinitionMap.put(beanName, beanDefinition);
     }
 
+    /**
+     * 获取BeanDefinition
+     */
+    public BeanDefinition getBeanDefinition(String beanName) throws Exception {
+        BeanDefinition bd = beanDefinitionMap.get(beanName);
+        if (bd == null) {
+            throw new Exception("No bean named '" + beanName + "' is defined");
+        }
+        return bd;
+    }
+
+    /**
+     * 获取单例Bean
+     */
+    public Object getSingleton(String beanName) {
+        return singletonObjects.get(beanName);
+    }
+
+    /**
+     * 销毁Bean
+     */
+    public void destroyBean(String beanName, Object bean) {
+        // 如果Bean实现了DisposableBean接口，调用其destroy方法
+        if (bean instanceof DisposableBean) {
+            try {
+                ((DisposableBean) bean).destroy();
+            } catch (Exception e) {
+                // 记录错误但不抛出，确保其他Bean能够正常销毁
+                e.printStackTrace();
+            }
+        }
+        // 从单例缓存中移除
+        singletonObjects.remove(beanName);
+    }
+
+    /**
+     * 清理单例Bean缓存
+     */
+    public void clearSingletonCache() {
+        singletonObjects.clear();
+    }
+
     @Override
     public Object getBean(String name) throws Exception {
         // 获取Bean定义
-        BeanDefinition beanDefinition = beanDefinitionMap.get(name);
-        if (beanDefinition == null) {
-            throw new Exception("No bean named '" + name + "' is defined");
-        }
+        BeanDefinition beanDefinition = getBeanDefinition(name);
 
         // 如果是单例，先尝试从单例容器中获取
         if (beanDefinition.isSingleton()) {
-            Object singleton = singletonObjects.get(name);
+            Object singleton = getSingleton(name);
             if (singleton == null) {
                 singleton = createBean(beanDefinition);
                 singletonObjects.put(name, singleton);
@@ -99,5 +138,12 @@ public class DefaultBeanFactory implements BeanFactory {
                 ReflectionUtil.setField(field, bean, dependencyBean);
             }
         }
+    }
+
+    /**
+     * 获取所有已注册的Bean定义名称
+     */
+    public String[] getBeanDefinitionNames() {
+        return beanDefinitionMap.keySet().toArray(new String[0]);
     }
 } 

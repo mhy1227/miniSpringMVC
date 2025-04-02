@@ -94,9 +94,14 @@
     - 重复URL检测
     - 线程安全的延迟初始化
   
-- [ ] ViewResolver
+- [x] ViewResolver
   - 功能：视图解析器
-  - 状态：待实现
+  - 状态：基础功能已实现
+    - 完成 View 接口定义
+    - 完成 ViewResolver 接口定义
+    - 实现 JSP 视图支持
+    - 支持视图前缀和后缀配置
+    - 集成到 DispatcherServlet
 
 ### 2.4 工具类 📝
 - [x] ClassScanner

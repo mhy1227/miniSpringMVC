@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -19,6 +21,7 @@ import java.util.Properties;
 public class DispatcherServlet extends HttpServlet {
     private ApplicationContext applicationContext;
     private HandlerMapping handlerMapping;
+    private ViewResolver viewResolver;
     private Properties properties;
 
     @Override
@@ -37,9 +40,22 @@ public class DispatcherServlet extends HttpServlet {
             // 3. 初始化HandlerMapping
             handlerMapping = new RequestMappingHandlerMapping(applicationContext);
             
+            // 4. 初始化ViewResolver
+            initViewResolver();
+            
         } catch (Exception e) {
             throw new ServletException("Failed to initialize DispatcherServlet", e);
         }
+    }
+
+    /**
+     * 初始化视图解析器
+     */
+    private void initViewResolver() {
+        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+        resolver.setPrefix(properties.getProperty("mvc.view.prefix", "/WEB-INF/views/"));
+        resolver.setSuffix(properties.getProperty("mvc.view.suffix", ".jsp"));
+        this.viewResolver = resolver;
     }
 
     @Override
@@ -61,7 +77,7 @@ public class DispatcherServlet extends HttpServlet {
             Object result = method.invoke(controller);
             
             // 4. 处理响应
-            handleResponse(resp, result);
+            handleResponse(req, resp, result);
             
         } catch (Exception e) {
             throw new ServletException("Failed to handle request", e);
@@ -71,19 +87,24 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * 处理响应
      */
-    private void handleResponse(HttpServletResponse response, Object result) throws IOException {
+    private void handleResponse(HttpServletRequest request, HttpServletResponse response, Object result) throws Exception {
         if (result == null) {
             return;
         }
         
-        response.setCharacterEncoding("UTF-8");
-        
-        // 如果是字符串，直接输出
+        // 如果返回值是字符串，尝试解析为视图
         if (result instanceof String) {
-            response.setContentType("text/plain;charset=UTF-8");
-            response.getWriter().write((String) result);
+            String viewName = (String) result;
+            View view = viewResolver.resolveViewName(viewName);
+            Map<String, Object> model = new HashMap<>(); // TODO: 从请求中获取模型数据
+            view.render(model, request, response);
+            return;
         }
-        // TODO: 处理其他类型的返回值（如JSON）
+        
+        // 如果是其他类型，当作普通响应处理
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/plain;charset=UTF-8");
+        response.getWriter().write(String.valueOf(result));
     }
 
     /**
