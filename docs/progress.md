@@ -54,17 +54,20 @@
   - 状态：已实现
 
 ### 2.2 IoC容器 📝
-- [ ] BeanFactory
+- [x] BeanFactory
   - 功能：Bean工厂接口
-  - 状态：开发中
+  - 状态：基础功能已实现
+    - 完成Bean的基本管理
+    - 实现依赖注入（字段注入）
+    - 支持单例和原型作用域
   
 - [ ] ApplicationContext
   - 功能：应用上下文
   - 状态：待实现
   
-- [ ] BeanDefinition
+- [x] BeanDefinition
   - 功能：Bean定义
-  - 状态：待实现
+  - 状态：已实现
 
 ### 2.3 MVC核心 📝
 - [ ] DispatcherServlet
