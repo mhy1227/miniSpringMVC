@@ -226,3 +226,112 @@ public static List<Class<?>> scanWithAnnotation(String basePackage,
 - 解决了 Tomcat 启动时的 NoSuchMethodException 错误
 - 优化了组件扫描逻辑，避免了不必要的注解类实例化
 - 提高了框架的健壮性 
+
+### 11.2 Controller 扫描失败问题
+#### 问题描述
+在启动应用后访问 `/mvc/hello.do` 时出现 404 错误。日志显示：
+```
+03-Apr-2025 10:32:40.132 信息 [http-nio-8080-exec-6] com.minispring.core.web.RequestMappingHandlerMapping.initialize Found 0 beans
+03-Apr-2025 10:32:40.133 信息 [http-nio-8080-exec-6] com.minispring.core.web.RequestMappingHandlerMapping.initialize URL mappings initialized: []
+```
+
+虽然 `application.properties` 中正确配置了组件扫描路径：
+```properties
+scan.package=com.minispring.core,com.minispring.test.mvc
+```
+但是系统无法扫描到任何 Controller。
+
+#### 根本原因
+1. Controller 类（如 `UserController`）被错误地放置在 `src/test/java` 目录下
+2. 在 Maven 项目中，`src/test/java` 目录下的类不会被打包到最终的 WAR 文件中
+3. 导致 Tomcat 运行时无法找到这些 Controller 类
+4. 最终导致组件扫描失败，没有找到任何可用的处理器映射
+
+#### 解决方案
+1. 将 Controller 类移动到正确的源代码目录：
+   - 从：`src/test/java/com/minispring/test/mvc/`
+   - 到：`src/main/java/com/minispring/test/mvc/`
+
+2. 保持包结构和类内容不变：
+```java
+package com.minispring.test.mvc;
+
+@Controller
+public class UserController {
+    @RequestMapping("/hello.do")
+    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return "Hello, " + name + "!";
+    }
+}
+```
+
+#### 技术要点
+1. Maven 项目结构规范：
+   - `src/main/java`: 项目源代码，会被打包到最终产物中
+   - `src/test/java`: 测试代码，不会被打包到最终产物中
+   - `src/main/resources`: 项目资源文件
+   - `src/test/resources`: 测试资源文件
+
+2. Spring MVC 组件扫描机制：
+   - 扫描路径配置必须正确
+   - 被扫描的类必须位于可访问的类路径下
+   - 类必须有正确的注解（如 @Controller）
+
+#### 相关影响
+- 修复了 404 错误问题
+- 确保了 Controller 能被正确扫描和注册
+- 改进了项目结构，符合 Maven 标准
+
+#### 经验总结
+1. 在开发 Web 应用时，确保业务代码放在正确的源代码目录下
+2. 理解构建工具（如 Maven）的项目结构约定
+3. 当出现 404 错误时，检查组件扫描的日志，确认 Controller 是否被正确注册
+4. 测试代码和生产代码要严格分离，放在正确的目录中 
+
+### 11.3 JDK 版本兼容性问题
+#### 环境信息
+```
+Java 环境变量:     D:\dev_tools\JAVA\jdk22
+Java虚拟机版本:    22.0.1+8-16
+```
+
+#### 潜在风险
+1. 项目在 `pom.xml` 中配置的是 JDK 1.8：
+```xml
+<properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+</properties>
+```
+
+2. 而实际运行环境是 JDK 22，这可能会导致：
+   - 编译时和运行时的不一致
+   - 某些 JDK 8 特性在 JDK 22 中的行为变化
+   - 反射和类加载行为的差异
+
+#### 建议措施
+1. 统一开发和运行环境：
+   - 要么升级项目到 JDK 22
+   - 要么降级运行环境到 JDK 8
+
+2. 如果选择升级到 JDK 22：
+   - 更新 `pom.xml` 的编译级别
+   ```xml
+   <properties>
+       <maven.compiler.source>22</maven.compiler.source>
+       <maven.compiler.target>22</maven.compiler.target>
+   </properties>
+   ```
+   - 检查所有反射相关的代码
+   - 确保第三方依赖兼容 JDK 22
+
+3. 如果选择使用 JDK 8：
+   - 修改 Tomcat 的 JRE 配置
+   - 确保开发环境使用 JDK 8
+   - 保持现有的 `pom.xml` 配置
+
+#### 最佳实践
+1. 开发环境和运行环境应该使用相同的 JDK 版本
+2. 在项目初期就确定好 JDK 版本
+3. 记录 JDK 版本要求在项目文档中
+4. 使用 CI/CD 时注意指定正确的 JDK 版本 

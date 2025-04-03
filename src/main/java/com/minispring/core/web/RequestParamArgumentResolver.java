@@ -1,7 +1,7 @@
 package com.minispring.core.web;
 
 import com.minispring.core.annotation.RequestParam;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 请求参数解析器

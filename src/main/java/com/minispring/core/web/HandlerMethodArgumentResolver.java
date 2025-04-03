@@ -1,6 +1,6 @@
 package com.minispring.core.web;
 
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 方法参数解析器接口

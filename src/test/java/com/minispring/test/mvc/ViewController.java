@@ -3,7 +3,7 @@ package com.minispring.test.mvc;
 import com.minispring.core.annotation.Controller;
 import com.minispring.core.annotation.RequestMapping;
 import com.minispring.core.annotation.RequestParam;
-import jakarta.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;
 
 
 @Controller

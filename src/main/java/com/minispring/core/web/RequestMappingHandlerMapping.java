@@ -3,8 +3,7 @@ package com.minispring.core.web;
 import com.minispring.core.annotation.Controller;
 import com.minispring.core.annotation.RequestMapping;
 import com.minispring.core.context.ApplicationContext;
-import jakarta.servlet.http.HttpServletRequest;
-
+import javax.servlet.http.HttpServletRequest;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
