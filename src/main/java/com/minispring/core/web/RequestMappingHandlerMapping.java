@@ -93,15 +93,16 @@ public class RequestMappingHandlerMapping implements HandlerMapping {
         // 获取请求路径
         String requestURI = request.getRequestURI();
         String contextPath = request.getContextPath();
-        String url = normalizePath(requestURI.substring(contextPath.length()));
+        String servletPath = request.getServletPath();
         
-        logger.info("Looking for handler for URL: " + url);
-        logger.info("Available mappings: " + urlHandlers.keySet());
+        logger.info("Request URI: " + requestURI);
+        logger.info("Context Path: " + contextPath);
+        logger.info("Servlet Path: " + servletPath);
         
         // 查找对应的处理器
-        HandlerExecutionChain handler = urlHandlers.get(url);
+        HandlerExecutionChain handler = urlHandlers.get(servletPath);
         if (handler == null) {
-            logger.warning("No handler found for URL: " + url);
+            logger.warning("No handler found for URL: " + servletPath);
         } else {
             logger.info("Found handler: " + handler);
         }
