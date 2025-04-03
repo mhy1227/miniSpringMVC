@@ -3,6 +3,8 @@ package com.minispring.test.mvc;
 import com.minispring.core.annotation.Controller;
 import com.minispring.core.annotation.RequestMapping;
 import com.minispring.core.annotation.RequestParam;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Controller
 public class UserController {
@@ -13,7 +15,11 @@ public class UserController {
     }
     
     @RequestMapping("/hello.do")
-    public String hello(@RequestParam(value = "name", defaultValue = "World") String name) {
-        return "Hello, " + name + "!";
+    public void hello(
+            @RequestParam(value = "name", defaultValue = "World") String name,
+            HttpServletResponse response) throws IOException {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/plain;charset=UTF-8");
+        response.getWriter().write("Hello, " + name + "!");
     }
 } 

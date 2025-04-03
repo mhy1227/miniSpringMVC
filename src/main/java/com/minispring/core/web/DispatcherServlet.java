@@ -44,8 +44,13 @@ public class DispatcherServlet extends HttpServlet {
             
             // 2. 初始化ApplicationContext
             String basePackage = properties.getProperty("scan.package");
+            logger.info("Scanning packages: " + basePackage);
             applicationContext = new AnnotationConfigApplicationContext(basePackage);
             applicationContext.refresh(); // 刷新上下文
+            
+            // 输出所有扫描到的Bean
+            String[] beanNames = applicationContext.getBeanDefinitionNames();
+            logger.info("Found beans: " + String.join(", ", beanNames));
             
             // 3. 初始化HandlerMapping
             handlerMapping = new RequestMappingHandlerMapping(applicationContext);
@@ -59,6 +64,7 @@ public class DispatcherServlet extends HttpServlet {
             logger.info("DispatcherServlet initialization completed");
         } catch (Exception e) {
             logger.severe("Failed to initialize DispatcherServlet: " + e.getMessage());
+            e.printStackTrace();
             throw new ServletException("Failed to initialize DispatcherServlet", e);
         }
     }
@@ -88,7 +94,7 @@ public class DispatcherServlet extends HttpServlet {
             // 2. 准备方法参数
             Object controller = handler.getHandler();
             Method method = handler.getHandlerMethod();
-            Object[] args = resolveHandlerArguments(method, req);
+            Object[] args = resolveHandlerArguments(method, req, resp);
             
             // 3. 调用处理器方法
             Object result = method.invoke(controller, args);
@@ -102,19 +108,29 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    private Object[] resolveHandlerArguments(Method method, HttpServletRequest request) throws Exception {
+    private Object[] resolveHandlerArguments(Method method, HttpServletRequest request, HttpServletResponse response) throws Exception {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
         
         for (int i = 0; i < parameters.length; i++) {
             MethodParameter methodParameter = new MethodParameter(method, i);
-            args[i] = resolveArgument(methodParameter, request);
+            args[i] = resolveArgument(methodParameter, request, response);
         }
         
         return args;
     }
 
-    private Object resolveArgument(MethodParameter parameter, HttpServletRequest request) throws Exception {
+    private Object resolveArgument(MethodParameter parameter, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // 处理特殊的Servlet API参数类型
+        Class<?> parameterType = parameter.getParameterType();
+        if (HttpServletRequest.class.isAssignableFrom(parameterType)) {
+            return request;
+        }
+        if (HttpServletResponse.class.isAssignableFrom(parameterType)) {
+            return response;
+        }
+        
+        // 使用参数解析器处理其他类型
         for (HandlerMethodArgumentResolver resolver : argumentResolvers) {
             if (resolver.supportsParameter(parameter)) {
                 return resolver.resolveArgument(parameter, request);

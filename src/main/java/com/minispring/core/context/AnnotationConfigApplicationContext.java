@@ -25,12 +25,18 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
 
     @Override
     public void refresh() throws Exception {
+        System.out.println("Starting context refresh...");
+        
         // 1. 扫描所有包下带有@Component注解的类
         List<Class<?>> allClasses = new ArrayList<>();
         for (String basePackage : basePackages) {
+            System.out.println("Scanning package: " + basePackage);
             List<Class<?>> classes = ClassScanner.scanWithAnnotation(basePackage.trim(), Component.class);
+            System.out.println("Found classes in " + basePackage + ": " + classes);
             allClasses.addAll(classes);
         }
+        
+        System.out.println("Total classes found: " + allClasses.size());
         
         // 2. 注册Bean定义
         for (Class<?> clazz : allClasses) {
@@ -39,20 +45,25 @@ public class AnnotationConfigApplicationContext implements ApplicationContext {
             
             // 获取bean名称：默认使用类名首字母小写
             String beanName = toLowerFirstCase(clazz.getSimpleName());
+            System.out.println("Registering bean: " + beanName + " -> " + clazz.getName());
             beanFactory.registerBeanDefinition(beanName, beanDefinition);
         }
 
         // 3. 初始化所有单例Bean
         String[] beanNames = beanFactory.getBeanDefinitionNames();
+        System.out.println("Initializing singleton beans: " + String.join(", ", beanNames));
+        
         for (String beanName : beanNames) {
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
             if (beanDefinition.isSingleton()) {
+                System.out.println("Creating singleton bean: " + beanName);
                 beanFactory.getBean(beanName);
             }
         }
 
         // 4. 标记上下文已激活
         active = true;
+        System.out.println("Context refresh completed.");
     }
 
     @Override

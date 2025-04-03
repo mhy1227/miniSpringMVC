@@ -20,6 +20,10 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
         String parameterName = requestParam.value();
         String parameterValue = request.getParameter(parameterName);
         
+        if (parameterValue == null) {
+            parameterValue = requestParam.defaultValue();
+        }
+        
         if (parameterValue == null && requestParam.required()) {
             throw new IllegalArgumentException(
                 String.format("Required parameter '%s' is not present", parameterName));

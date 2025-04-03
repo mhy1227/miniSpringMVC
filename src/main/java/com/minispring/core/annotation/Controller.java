@@ -3,8 +3,8 @@ package com.minispring.core.annotation;
 import java.lang.annotation.*;
 
 /**
- * 标记一个类为控制器
- * 被此注解标记的类将被视为MVC中的控制器，用于处理HTTP请求
+ * 控制器注解
+ * 标记一个类为Web控制器
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
