@@ -184,4 +184,45 @@
 - ✅ 已完成
 - ⚠️ 进行中
 - 📝 待开始
-- 📅 计划中 
+- 📅 计划中
+
+## 十一、问题记录与解决方案
+
+### 11.1 注解类实例化问题
+#### 问题描述
+在将项目从 javax.servlet 迁移到 jakarta.servlet 后，启动 Tomcat 10.1.28 时出现以下错误：
+```
+java.lang.NoSuchMethodException: com.minispring.core.annotation.Controller.<init>()
+```
+
+错误原因：在组件扫描过程中，系统错误地尝试实例化注解类型（如 @Controller、@Component 等）。这是不正确的，因为注解类型不应该被实例化。
+
+#### 解决方案
+修改 `ClassScanner` 类的 `scanWithAnnotation` 方法，添加对注解类型的过滤：
+```java
+public static List<Class<?>> scanWithAnnotation(String basePackage, 
+        Class<? extends Annotation> annotation) throws Exception {
+    List<String> classNames = scanPackage(basePackage);
+    List<Class<?>> result = new ArrayList<>();
+    
+    for (String className : classNames) {
+        Class<?> clazz = Class.forName(className);
+        // 添加 !clazz.isAnnotation() 条件来过滤掉注解类型
+        if (!clazz.isAnnotation() && clazz.isAnnotationPresent(annotation)) {
+            result.add(clazz);
+        }
+    }
+    
+    return result;
+}
+```
+
+#### 技术要点
+1. 使用 `Class.isAnnotation()` 方法判断一个类是否为注解类型
+2. 在扫描带有 @Component 注解的类时，确保不包含注解类型本身
+3. 这个修改确保了只有实际的组件类（如控制器、服务类等）会被注册为 Bean
+
+#### 相关影响
+- 解决了 Tomcat 启动时的 NoSuchMethodException 错误
+- 优化了组件扫描逻辑，避免了不必要的注解类实例化
+- 提高了框架的健壮性 

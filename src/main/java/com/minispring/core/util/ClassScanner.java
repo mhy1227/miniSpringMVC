@@ -46,7 +46,7 @@ public class ClassScanner {
         
         for (String className : classNames) {
             Class<?> clazz = Class.forName(className);
-            if (clazz.isAnnotationPresent(annotation)) {
+            if (!clazz.isAnnotation() && clazz.isAnnotationPresent(annotation)) {
                 result.add(clazz);
             }
         }
